@@ -3,7 +3,7 @@ name: PR Review Agent
 on:
   pull_request:
     branches:
-      - master
+      - main
     types:
       - opened
       - synchronize
