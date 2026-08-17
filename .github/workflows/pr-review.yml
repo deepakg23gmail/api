@@ -118,38 +118,38 @@ jobs:
 
           REVIEW_REPORT="# PR Review Summary
 
-**PR:** #${{ github.event.pull_request.number }}
-**Branch:** \`${{ github.head_ref }}\` -> \`${{ github.base_ref }}\`
-**Commit:** \`${{ github.sha }}\`
-**Date:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')
+          **PR:** #${{ github.event.pull_request.number }}
+          **Branch:** \`${{ github.head_ref }}\` -> \`${{ github.base_ref }}\`
+          **Commit:** \`${{ github.sha }}\`
+          **Date:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')
 
----
+          ---
 
-## Changed Files
+          ## Changed Files
 
-\`\`\`
-${STAT_OUTPUT}
-\`\`\`
+          \`\`\`
+          ${STAT_OUTPUT}
+          \`\`\`
 
-## Changed File List
+          ## Changed File List
 
-\`\`\`
-${CHANGED_FILES}
-\`\`\`
+          \`\`\`
+          ${CHANGED_FILES}
+          \`\`\`
 
----
+          ---
 
-## PR Review Agent Analysis
+          ## PR Review Agent Analysis
 
-The PR Review Agent has analysed the above changes. Full automated review requires the OpenCode CLI or API integration. Below is the structural analysis of the PR.
+          The PR Review Agent has analysed the above changes. Full automated review requires the OpenCode CLI or API integration. Below is the structural analysis of the PR.
 
-### Build Status
+          ### Build Status
 
-The project build and tests were executed in the preceding job. Review the Build & Test job results for test outcomes.
+          The project build and tests were executed in the preceding job. Review the Build & Test job results for test outcomes.
 
-### Files Changed Summary
+          ### Files Changed Summary
 
-"
+          "
 
           FILE_COUNT=$(echo "$CHANGED_FILES" | grep -c '.' || echo "0")
           JAVA_FILES=$(echo "$CHANGED_FILES" | grep '\.java$' | wc -l | tr -d ' ')
@@ -158,21 +158,21 @@ The project build and tests were executed in the preceding job. Review the Build
           MD_FILES=$(echo "$CHANGED_FILES" | grep '\.md$' | wc -l | tr -d ' ')
 
           REVIEW_REPORT+="
-| File Type | Count |
-|-----------|-------|
-| Java files | ${JAVA_FILES} |
-| XML files | ${XML_FILES} |
-| YAML/YML files | ${YML_FILES} |
-| Markdown files | ${MD_FILES} |
-| **Total** | **${FILE_COUNT}** |
+          | File Type | Count |
+          |-----------|-------|
+          | Java files | ${JAVA_FILES} |
+          | XML files | ${XML_FILES} |
+          | YAML/YML files | ${YML_FILES} |
+          | Markdown files | ${MD_FILES} |
+          | **Total** | **${FILE_COUNT}** |
 
-### Automated Review
+          ### Automated Review
 
-> **Note:** For full AI-powered review with detailed findings, run the PR Review Agent locally via OpenCode or configure the OPENCODE_API_KEY secret for enhanced analysis.
+          > **Note:** For full AI-powered review with detailed findings, run the PR Review Agent locally via OpenCode or configure the OPENCODE_API_KEY secret for enhanced analysis.
 
-The following structural checks were performed automatically:
+          The following structural checks were performed automatically:
 
-"
+          "
 
           HAS_CONTROLLER=false
           HAS_SERVICE=false
@@ -200,59 +200,59 @@ The following structural checks were performed automatically:
 
           if [ "$HAS_SECRET" = true ]; then
             REVIEW_REPORT+="
-| Severity | File | Area | Finding |
-|----------|------|------|---------|
-| :rotating_light: **Critical** | Multiple | Security | Hardcoded secret detected | See detailed notes |
-"
+          | Severity | File | Area | Finding |
+          |----------|------|------|---------|
+          | :rotating_light: **Critical** | Multiple | Security | Hardcoded secret detected | See detailed notes |
+          "
           fi
 
           if [ "$HAS_CONTROLLER" = true ] && [ "$HAS_SERVICE" = false ]; then
             REVIEW_REPORT+="
-| Severity | File | Area | Finding |
-|----------|------|------|---------|
-| :warning: **Major** | Controllers | Spring Boot | Controller changes without corresponding service layer changes |
-"
+          | Severity | File | Area | Finding |
+          |----------|------|------|---------|
+          | :warning: **Major** | Controllers | Spring Boot | Controller changes without corresponding service layer changes |
+          "
           fi
 
           if [ "$HAS_POM" = true ]; then
             REVIEW_REPORT+="
-| Severity | File | Area | Finding |
-|----------|------|------|---------|
-| :information_source: **Minor** | pom.xml | Maven | Verify dependency changes are intentional |
-"
+          | Severity | File | Area | Finding |
+          |----------|------|------|---------|
+          | :information_source: **Minor** | pom.xml | Maven | Verify dependency changes are intentional |
+          "
           fi
 
           if [ -f /tmp/findings.md ]; then
             REVIEW_REPORT+="
-$(cat /tmp/findings.md)
-"
+          $(cat /tmp/findings.md)
+          "
           fi
 
           REVIEW_REPORT+="
----
+          ---
 
-# Quality Checklist
+          # Quality Checklist
 
-| Check | Status | Notes |
-|-------|--------|-------|
-| Code quality reviewed | Pass | Structural analysis complete |
-| Design quality reviewed | Pass | Structural analysis complete |
-| Controller logic is thin | $([ "$HAS_CONTROLLER" = true ] && echo "Concern" || echo "N/A") | Controller files changed |
-| Business logic is in service layer | $([ "$HAS_CONTROLLER" = true ] && [ "$HAS_SERVICE" = false ] && echo "Concern" || echo "Pass") | |
-| DTO usage reviewed | Pass | Structural analysis complete |
-| Entity exposure reviewed | Pass | Structural analysis complete |
-| Validation reviewed | Pass | Structural analysis complete |
-| Exception handling reviewed | Pass | Structural analysis complete |
-| Testing reviewed | $([ "$HAS_TEST" = true ] && echo "Pass" || echo "Concern") | $([ "$HAS_TEST" = true ] && echo "Tests included in PR" || echo "No test files found in PR") |
-| Security concerns reviewed | $([ "$HAS_SECRET" = true ] && echo "Concern" || echo "Pass") | |
-| Performance risks reviewed | Pass | Structural analysis complete |
-| Maven changes reviewed | $([ "$HAS_POM" = true ] && echo "Pass" || echo "N/A") | |
+          | Check | Status | Notes |
+          |-------|--------|-------|
+          | Code quality reviewed | Pass | Structural analysis complete |
+          | Design quality reviewed | Pass | Structural analysis complete |
+          | Controller logic is thin | $([ "$HAS_CONTROLLER" = true ] && echo "Concern" || echo "N/A") | Controller files changed |
+          | Business logic is in service layer | $([ "$HAS_CONTROLLER" = true ] && [ "$HAS_SERVICE" = false ] && echo "Concern" || echo "Pass") | |
+          | DTO usage reviewed | Pass | Structural analysis complete |
+          | Entity exposure reviewed | Pass | Structural analysis complete |
+          | Validation reviewed | Pass | Structural analysis complete |
+          | Exception handling reviewed | Pass | Structural analysis complete |
+          | Testing reviewed | $([ "$HAS_TEST" = true ] && echo "Pass" || echo "Concern") | $([ "$HAS_TEST" = true ] && echo "Tests included in PR" || echo "No test files found in PR") |
+          | Security concerns reviewed | $([ "$HAS_SECRET" = true ] && echo "Concern" || echo "Pass") | |
+          | Performance risks reviewed | Pass | Structural analysis complete |
+          | Maven changes reviewed | $([ "$HAS_POM" = true ] && echo "Pass" || echo "N/A") | |
 
----
+          ---
 
-*Generated by PR Review Agent for repository ${{ github.repository }}*"
+          *Generated by PR Review Agent for repository ${{ github.repository }}*"
 
-          echo "$REVIEW_REPORT" > review.md
+          echo "$REVIEW_REPORT" | sed 's/^          //' > review.md
           echo "Review report generated"
 
           if [ "$HAS_SECRET" = true ]; then
