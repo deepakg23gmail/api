@@ -1,0 +1,29 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "agent": {
+    "pr-review-agent": {
+      "description": "Read-only PR review agent that reports code quality and design standard findings. It does not modify, fix, refactor, commit, or push code.",
+      "mode": "all",
+      "permission": {
+        "read": "allow",
+        "edit": "deny",
+        "bash": {
+          "git diff *": "allow",
+          "git log *": "allow",
+          "git show *": "allow",
+          "git status": "allow",
+          "git branch *": "allow",
+          "*": "deny"
+        },
+        "glob": "allow",
+        "grep": "allow",
+        "webfetch": "allow",
+        "websearch": "deny",
+        "todowrite": "allow",
+        "task": "allow",
+        "lsp": "deny",
+        "external_directory": "deny"
+      }
+    }
+  }
+}
