@@ -1,0 +1,17 @@
+com/example/productapi/dto/ProductResponse.class
+com/example/productapi/config/WebConfig.class
+com/example/productapi/dto/ApiError.class
+com/example/productapi/config/WebConfig$RequestLoggingInterceptor.class
+com/example/productapi/controller/ProductController.class
+com/example/productapi/exception/GlobalExceptionHandler.class
+com/example/productapi/dto/ProductRequest.class
+com/example/productapi/dto/ApiResponse.class
+com/example/productapi/config/DataSeeder.class
+com/example/productapi/config/OpenApiConfig.class
+com/example/productapi/exception/ResourceNotFoundException.class
+com/example/productapi/ProductApiApplication.class
+com/example/productapi/service/impl/ProductServiceImpl.class
+com/example/productapi/dto/ApiError$FieldError.class
+com/example/productapi/entity/Product.class
+com/example/productapi/repository/ProductRepository.class
+com/example/productapi/service/ProductService.class
