@@ -219,12 +219,11 @@ Review the diff between main and HEAD. Focus on the changed files. Report findin
 When a pull request is opened, updated, or reopened against `main`:
 
 1. GitHub Actions starts automatically.
-2. The **Build & Test** job compiles the project and runs all tests.
-3. The **PR Review** job identifies changed files.
-4. The PR Review Agent performs structural analysis and posts findings as a PR comment.
-5. If Critical findings are detected, the workflow fails.
-6. If no Critical findings exist, the workflow passes.
-7. No code is modified at any point.
+2. The repository is checked out.
+3. The official OpenCode GitHub Action runs the PR Review Agent inside the GitHub Actions runner.
+4. The agent reads the PR diff, analyses the changed files using the review criteria defined in `.opencode/agents/pr-review-agent.md`, and produces a detailed review report.
+5. The review is posted as a comment on the pull request.
+6. No code is modified at any point.
 
 ### Workflow File
 
@@ -241,18 +240,19 @@ on:
       - opened
       - synchronize
       - reopened
+      - ready_for_review
 ```
 
 ### Permissions
 
-The workflow uses least-privilege permissions:
-
 ```yaml
 permissions:
+  id-token: write
   contents: read
   pull-requests: write
 ```
 
+- `id-token: write` - Required for OpenCode authentication with Zen.
 - `contents: read` - Read repository files.
 - `pull-requests: write` - Post review comments on the PR.
 
@@ -260,37 +260,28 @@ permissions:
 
 | Step | Action | Modifies Code? |
 |------|--------|----------------|
-| Checkout | Clones the repository | No |
-| Setup Java | Installs JDK 25 | No |
-| Build & Test | Runs `mvn clean verify` | No |
-| Identify Changes | Runs `git diff` | No |
-| Review Agent | Analyses changed files | No |
-| Post Comment | Posts review on PR | No |
-| Fail Build | Fails only on Critical findings | No |
+| Checkout | Clones the repository with full history | No |
+| Run PR Review Agent | Runs OpenCode with `pr-review-agent` using the `big-pickle` model | No |
 
 ---
 
 ## Setting Up OPENCODE_API_KEY
 
-The `OPENCODE_API_KEY` secret is used for enhanced AI-powered review analysis. Without it, the workflow performs structural analysis only.
+The `OPENCODE_API_KEY` secret is **required** for the GitHub Action to work. It authenticates with OpenCode Zen to power the AI review.
 
 ### Steps to Create the Secret
 
-1. Go to your GitHub repository.
-2. Navigate to **Settings** > **Secrets and variables** > **Actions**.
-3. Click **New repository secret**.
-4. Name: `OPENCODE_API_KEY`
-5. Value: Your OpenCode API key.
-6. Click **Add secret**.
+1. Sign in to [OpenCode Zen](https://opencode.ai/auth) and copy your API key.
+2. Go to your GitHub repository.
+3. Navigate to **Settings** > **Secrets and variables** > **Actions**.
+4. Click **New repository secret**.
+5. Name: `OPENCODE_API_KEY`
+6. Value: Your OpenCode Zen API key.
+7. Click **Add secret**.
 
 ### Without the Secret
 
-The workflow still runs and posts a structural review comment with:
-
-- Changed file statistics
-- Build and test results
-- Basic structural checks (e.g., controller changes without service changes)
-- Security pattern detection
+The workflow will fail because the OpenCode GitHub Action requires a valid API key to run the AI model.
 
 ---
 
@@ -354,11 +345,10 @@ To make the PR Review Agent a required status check:
    - **Require status checks to pass before merging**
    - **Require branches to be up to date before merging**
 5. In the status check list, search for and select:
-   - `Build & Test`
    - `PR Review`
 6. Click **Save changes**.
 
-After this configuration, pull requests cannot be merged until both the build and the review pass.
+After this configuration, pull requests cannot be merged until the review passes.
 
 ---
 
@@ -417,9 +407,9 @@ git push -u origin demo/pr-review-agent
 
 Monitor the Actions tab. The workflow will:
 
-1. Build and test the project.
-2. Run the PR Review Agent.
-3. Post a comment on the PR.
+1. Check out the repository.
+2. Run the OpenCode PR Review Agent with the `big-pickle` model.
+3. Post a detailed review comment on the PR.
 
 #### Step 7: Open the PR Comment
 
@@ -501,23 +491,15 @@ git push origin --delete demo/pr-review-agent
 3. Check the Actions tab for any workflow errors.
 4. Verify the workflow file syntax is valid YAML.
 
-### Build Fails in GitHub Actions
-
-**Cause:** The project does not compile or tests fail.
-
-**Fix:**
-1. Run `mvn clean verify` locally to reproduce.
-2. Fix the build issue in the PR.
-3. Push the fix.
-
 ### Review Comment Not Posted
 
-**Cause:** The workflow does not have permission to post comments.
+**Cause:** The workflow does not have permission to post comments, or the OPENCODE_API_KEY is invalid.
 
 **Fix:**
 1. Verify `permissions.pull-requests: write` is set in the workflow.
-2. Check that the GitHub token has sufficient permissions.
-3. Review the Actions logs for errors.
+2. Verify `permissions.id-token: write` is set in the workflow.
+3. Check that the `OPENCODE_API_KEY` secret contains a valid OpenCode Zen API key.
+4. Review the Actions logs for errors.
 
 ### OPENCODE_API_KEY Not Working
 
@@ -526,7 +508,8 @@ git push origin --delete demo/pr-review-agent
 **Fix:**
 1. Go to repository Settings > Secrets > Actions.
 2. Verify `OPENCODE_API_KEY` exists and has the correct value.
-3. Re-run the workflow.
+3. Ensure you are using an OpenCode Zen API key (sign in at opencode.ai/auth).
+4. Re-run the workflow.
 
 ### Agent Runs But Produces No Findings
 
@@ -536,15 +519,6 @@ git push origin --delete demo/pr-review-agent
 1. This is normal behaviour. The agent reports only actual findings.
 2. If you expect findings, review the agent prompt for specificity.
 
-### Workflow Does Not Fail on Critical Findings
-
-**Cause:** The critical finding detection step may not be executing correctly.
-
-**Fix:**
-1. Check the Actions logs for the "Check for critical findings" step.
-2. Verify the `has_critical` output variable is being set.
-3. Review the pattern matching logic in the workflow.
-
 ---
 
 ## File Reference
@@ -552,7 +526,7 @@ git push origin --delete demo/pr-review-agent
 | File | Purpose |
 |------|---------|
 | `.opencode/agents/pr-review-agent.md` | Agent definition for OpenCode |
-| `opencode.json` | OpenCode project configuration |
-| `.github/workflows/pr-review.yml` | GitHub Actions workflow |
+| `opencode.json` | OpenCode project configuration (model, agent permissions) |
+| `.github/workflows/pr-review.yml` | GitHub Actions workflow using official OpenCode Action |
 | `README-PR-REVIEW.md` | This documentation file |
 | `sample-review-report.md` | Example output from the agent |
