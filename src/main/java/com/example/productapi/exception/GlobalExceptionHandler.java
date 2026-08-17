@@ -45,12 +45,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiError> handleIllegalArgument(IllegalArgumentException ex) {
-        
-        try {
           log.warn("Bad request: {}", ex.getMessage());
-        } catch(Exception e){
-
-        }
+      
         ApiError error = new ApiError(
                 HttpStatus.BAD_REQUEST.value(),
                 "Bad Request",
