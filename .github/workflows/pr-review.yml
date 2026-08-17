@@ -41,20 +41,4 @@ jobs:
           agent: pr-review-agent
           use_github_token: true
           prompt: |
-            Review the pull request against the main branch. Follow your full review instructions exactly:
-
-            1. Run: git diff --name-only origin/main...HEAD
-            2. Run: git diff --stat origin/main...HEAD
-            3. Run: git diff origin/main...HEAD
-            4. For each changed file, read the full file to understand context
-            5. Apply ALL review criteria: Code Quality, Design Quality, Spring Boot, REST API, Test Quality, Security, Performance, and Maven
-            6. Assign severity: Critical, Major, Minor, or Suggestion
-            7. Produce the complete review report in the exact output format defined in your instructions, including:
-               - PR Review Summary (Overall Assessment, Merge Recommendation, Key Risks)
-               - Findings table
-               - Detailed Review Notes for each finding (with Severity, File, Area, Finding, Why It Matters, Recommendation)
-               - Positive Observations
-               - Final Recommendation
-               - Quality Checklist
-
-            Report only code quality and design standard findings. Do not fix or modify code.
+            Review the pull request against ${{ github.event.pull_request.base.ref }}. Report only code quality and design standard findings. Do not fix or modify code.
